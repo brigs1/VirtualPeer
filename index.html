@@ -4,14 +4,57 @@
     <meta charset="UTF-8">
     <title>Cytoscape.js Graph for PubTator3 Bioconcepts</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+            margin: 0;
+        }
+        .section {
+            flex: 1;
+            border: 1px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-width: 100px; /* 최소 너비 설정 */
+        }
+        .graph-section {
+            flex: 2;
+            border: 1px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 100px; /* 최소 너비 설정 */
+        }
+        #cy {
+            width: 70%;
+            height: 70%;
+            border: 1px solid #ccc;
+        }
+        .resizer {
+            width: 5px;
+            cursor: ew-resize;
+            background-color: #ccc;
+        }
+    </style>
 </head>
 <body>
-    <h2>Cytoscape.js Graph for PubTator3 Bioconcepts</h2>
-    <label for="bioconcept">Enter Bioconcept Name:</label>
-    <input type="text" id="bioconcept" placeholder="e.g., SNAP-25" />
-    <button onclick="loadGraph()">Load Graph</button>
-    
-    <div id="cy" style="width: 100%; height: 600px; margin-top: 20px;"></div>
+    <div class="section">
+        <h2>Search Bioconcept</h2>
+        <label for="bioconcept">Enter Bioconcept Name:</label>
+        <input type="text" id="bioconcept" placeholder="e.g., SNAP-25" />
+        <button onclick="loadGraph()">Load Graph</button>
+    </div>
+    <div class="resizer" id="resizer1"></div>
+    <div class="graph-section">
+        <div id="cy"></div>
+    </div>
+    <div class="resizer" id="resizer2"></div>
+    <div class="section">
+        <h2>Edge Information</h2>
+        <div id="edge-info" style="margin-top: 20px;"></div>
+    </div>
 
     <script>
         function loadGraph() {
@@ -85,7 +128,12 @@
                                     'width': 2,
                                     'line-color': '#cccccc',
                                     'target-arrow-color': '#cccccc',
-                                    'target-arrow-shape': 'triangle'
+                                    'target-arrow-shape': 'triangle',
+                                    'label': 'data(relationship)',
+                                    'font-size': '10px', // 엣지 라벨 크기
+                                    'color': '#0000FF', // 엣지 라벨 색상 (파란색)
+                                    'text-valign': 'center',
+                                    'text-halign': 'center'
                                 }
                             }
                         ],
@@ -102,15 +150,65 @@
 
                     // 노드 데이터 확인용 코드
                     cy.nodes().forEach(node => console.log(node.data()));
-                    cy.on('mouseover', 'node', (event) => {
+                    cy.on('dbltap', 'node', (event) => {
                         const node = event.target;
                         alert(`Node information:\nLabel: ${node.data('label')}\nType: ${node.data('type')}`);
+                    });
+
+                    // 엣지 데이터 확인용 코드
+                    cy.edges().forEach(edge => console.log(edge.data()));
+                    cy.on('dbltap', 'edge', (event) => {
+                        const edge = event.target;
+                        alert(`Edge information:\nSource: ${edge.data('source')}\nTarget: ${edge.data('target')}\nRelationship: ${edge.data('relationship')}\nPublications: ${edge.data('publications').join(', ')}`);
+                    });
+
+                    // 엣지 클릭 이벤트 핸들러
+                    cy.on('tap', 'edge', (event) => {
+                        const edge = event.target;
+                        const edgeInfo = `Edge information:\nSource: ${edge.data('source')}\nTarget: ${edge.data('target')}\nRelationship: ${edge.data('relationship')}\nPublications: ${edge.data('publications').join(', ')}`;
+                        document.getElementById('edge-info').innerHTML = edgeInfo;
                     });
                 })
                 .catch(error => {
                     console.error("Error fetching graph data:", error);
                     alert("Error loading graph data.");
                 });
+        }
+
+        // Resizer 기능 추가
+        const resizers = document.querySelectorAll('.resizer');
+        let currentResizer;
+        let startX;
+        let startWidthPrev;
+        let startWidthNext;
+
+        for (let resizer of resizers) {
+            resizer.addEventListener('mousedown', function(e) {
+                currentResizer = e.target;
+                startX = e.clientX;
+                const prevSibling = currentResizer.previousElementSibling;
+                const nextSibling = currentResizer.nextElementSibling;
+                startWidthPrev = prevSibling.getBoundingClientRect().width;
+                startWidthNext = nextSibling.getBoundingClientRect().width;
+                document.addEventListener('mousemove', resize);
+                document.addEventListener('mouseup', stopResize);
+            });
+        }
+
+        function resize(e) {
+            const prevSibling = currentResizer.previousElementSibling;
+            const nextSibling = currentResizer.nextElementSibling;
+
+            const newPrevWidth = startWidthPrev + (e.clientX - startX);
+            const newNextWidth = startWidthNext - (e.clientX - startX);
+
+            prevSibling.style.flex = `0 0 ${newPrevWidth}px`;
+            nextSibling.style.flex = `0 0 ${newNextWidth}px`;
+        }
+
+        function stopResize() {
+            document.removeEventListener('mousemove', resize);
+            document.removeEventListener('mouseup', stopResize);
         }
     </script>
 </body>
