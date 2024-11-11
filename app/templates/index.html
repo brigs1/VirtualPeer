@@ -17,7 +17,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-width: 100px; /* 최소 너비 설정 */
+            min-width: 100px;
         }
         .graph-section {
             flex: 2;
@@ -25,7 +25,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-width: 100px; /* 최소 너비 설정 */
+            min-width: 100px;
         }
         #cy {
             width: 70%;
@@ -72,52 +72,63 @@
                         return;
                     }
 
-                    console.log(data);  // 데이터를 콘솔에 출력하여 확인
+                    console.log("Received data:", data);
 
                     const cy = cytoscape({
                         container: document.getElementById('cy'),
                         elements: data,
                         style: [
                             {
-                                selector: 'node[type="Gene"]',
+                                selector: 'node[type = "Gene"]',
                                 style: {
                                     'background-color': '#FF4500', // 오렌지
                                     'label': 'data(label)',
-                                    'color': '#000', // 라벨 색상
-                                    'font-size': '10px', // 라벨 크기
+                                    'color': '#000',
+                                    'font-size': '10px',
                                     'text-valign': 'center',
                                     'text-halign': 'center'
                                 }
                             },
                             {
-                                selector: 'node[type="Chemical"]',
+                                selector: 'node[type = "Chemical"]',
                                 style: {
                                     'background-color': '#1E90FF', // 파랑
                                     'label': 'data(label)',
-                                    'color': '#000', // 라벨 색상
-                                    'font-size': '10px', // 라벨 크기
+                                    'color': '#000',
+                                    'font-size': '10px',
                                     'text-valign': 'center',
                                     'text-halign': 'center'
                                 }
                             },
                             {
-                                selector: 'node[type="Disease"]',
+                                selector: 'node[type = "Disease"]',
                                 style: {
                                     'background-color': '#32CD32', // 녹색
                                     'label': 'data(label)',
-                                    'color': '#000', // 라벨 색상
-                                    'font-size': '10px', // 라벨 크기
+                                    'color': '#000',
+                                    'font-size': '10px',
                                     'text-valign': 'center',
                                     'text-halign': 'center'
                                 }
                             },
                             {
-                                selector: 'node',
+                                selector: 'node[type = "Mutation"]',
                                 style: {
-                                    'background-color': '#777', // 기본 색상 (회색)
+                                    'background-color': '#8A2BE2', // 보라색
                                     'label': 'data(label)',
-                                    'color': '#000', // 라벨 색상
-                                    'font-size': '10px', // 라벨 크기
+                                    'color': '#000',
+                                    'font-size': '10px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center'
+                                }
+                            },
+                            {
+                                selector: `node[label = "${bioconcept}"]`,
+                                style: {
+                                    'background-color': '#FF0000', // 빨간색
+                                    'label': 'data(label)',
+                                    'color': '#000',
+                                    'font-size': '10px',
                                     'text-valign': 'center',
                                     'text-halign': 'center'
                                 }
@@ -130,8 +141,8 @@
                                     'target-arrow-color': '#cccccc',
                                     'target-arrow-shape': 'triangle',
                                     'label': 'data(relationship)',
-                                    'font-size': '10px', // 엣지 라벨 크기
-                                    'color': '#0000FF', // 엣지 라벨 색상 (파란색)
+                                    'font-size': '10px',
+                                    'color': '#0000FF',
                                     'text-valign': 'center',
                                     'text-halign': 'center'
                                 }
@@ -140,22 +151,28 @@
                         layout: {
                             name: 'cose',
                             animate: true,
-                            idealEdgeLength: 100, // 노드 간 간격 증가
-                            nodeOverlap: 10,      // 노드 간 중첩 방지
+                            idealEdgeLength: 100,
+                            nodeOverlap: 10,
                             padding: 10,
-                            nodeRepulsion: 4000,  // 노드 간 반발력 증가
+                            nodeRepulsion: 4000,
                             edgeElasticity: 100
                         }
                     });
 
-                    // 노드 데이터 확인용 코드
-                    cy.nodes().forEach(node => console.log(node.data()));
+                    // 노드 데이터 확인
+                    cy.nodes().forEach(node => {
+                        console.log(node.data());
+                        if (node.data().type === "Chemical") {
+                            console.log("Chemical node found:", node.data());
+                        }
+                    });
+
                     cy.on('dbltap', 'node', (event) => {
                         const node = event.target;
                         alert(`Node information:\nLabel: ${node.data('label')}\nType: ${node.data('type')}`);
                     });
 
-                    // 엣지 데이터 확인용 코드
+                    // 엣지 데이터 확인
                     cy.edges().forEach(edge => console.log(edge.data()));
                     cy.on('dbltap', 'edge', (event) => {
                         const edge = event.target;
@@ -165,7 +182,7 @@
                     // 엣지 클릭 이벤트 핸들러
                     cy.on('tap', 'edge', (event) => {
                         const edge = event.target;
-                        const edgeInfo = `Edge information:\nSource: ${edge.data('source')}\nTarget: ${edge.data('target')}\nRelationship: ${edge.data('relationship')}\nPublications: ${edge.data('publications').join(', ')}`;
+                        const edgeInfo = `Edge information:<br>Source: ${edge.data('source')}<br>Target: ${edge.data('target')}<br>Relationship: ${edge.data('relationship')}<br>Publications: ${edge.data('publications').join(', ')}`;
                         document.getElementById('edge-info').innerHTML = edgeInfo;
                     });
                 })

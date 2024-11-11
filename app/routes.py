@@ -1,10 +1,6 @@
-from flask import Flask, jsonify, request, render_template
-from flask_cors import CORS
+from flask import render_template, jsonify, request, current_app
 import requests
 import time
-
-app = Flask(__name__)
-CORS(app)  # CORS 활성화
 
 def get_entity_id(entity_name, concept_type=None, limit=10):
     base_url = "https://www.ncbi.nlm.nih.gov/research/pubtator3-api/entity/autocomplete/"
@@ -26,7 +22,6 @@ def get_entity_id(entity_name, concept_type=None, limit=10):
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")
     except Exception as err:
-
         print(f"Other error occurred: {err}")
 
     return None
@@ -57,29 +52,11 @@ def find_related_entities(entity_id):
 
     return []
 
-def fetch_pmids_for_relation(entity_id, source_id, target_id, pmid_count):
-    # 논문 번호를 가져오는 로직
-    base_url = "https://www.ncbi.nlm.nih.gov/research/pubtator3-api/publications/export/biocjson"
-    params = {"pmids": ",".join([str(i) for i in range(1, pmid_count + 1)])}
-
-    try:
-        response = requests.get(base_url, params=params)
-        response.raise_for_status()  # HTTP 오류가 발생하면 예외 발생
-        results = response.json()
-        pmids = [result['pmid'] for result in results.get('documents', [])]
-        return pmids
-    except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
-    except Exception as err:
-        print(f"Other error occurred: {err}")
-
-    return []
-
-@app.route('/')
+@current_app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route('/api/graph/<entity_name>', methods=['GET'])
+@current_app.route('/api/graph/<entity_name>', methods=['GET'])
 def get_graph_data(entity_name):
     entity_id = get_entity_id(entity_name, concept_type="gene")
     if not entity_id:
@@ -95,11 +72,15 @@ def get_graph_data(entity_name):
         relation_type = item['type']
         pmid_list = item.get('publications', [])
 
+        print(f"Processing source_id: {source_id}")
         source_type, source_name = source_id.split("_", 1)
         source_type = source_type[1:].capitalize()  # '@gene' -> 'Gene'
+        print(f"source_type: {source_type}, source_name: {source_name}")
 
+        print(f"Processing target_id: {target_id}")
         target_type, target_name = target_id.split("_", 1)
         target_type = target_type[1:].capitalize()  # '@chemical' -> 'Chemical'
+        print(f"target_type: {target_type}, target_name: {target_name}")
 
         # 노드 추가 (type과 pmid 포함)
         if not any('id' in node['data'] and node['data']['id'] == source_id for node in elements):
@@ -134,40 +115,20 @@ def get_graph_data(entity_name):
 
     return jsonify(elements)
 
-@app.route('/add_entity', methods=['POST'])
-def add_entity():
-    entity_name = request.json.get('entity_name')
-    if not entity_name:
-        return jsonify({"error": "entity_name parameter is required"}), 400
+def fetch_pmids_for_relation(entity_id, source_id, target_id, pmid_count):
+    # 논문 번호를 가져오는 로직
+    base_url = "https://www.ncbi.nlm.nih.gov/research/pubtator3-api/publications/export/biocjson"
+    params = {"pmids": ",".join([str(i) for i in range(1, pmid_count + 1)])}
 
-    # PubTator3 API를 사용하여 엔티티와 관련된 논문 PMIDs 가져오기
-    pmids = fetch_pmids_for_entity(entity_name)
-    if not pmids:
-        return jsonify({"error": "No PMIDs found for the given entity"}), 404
+    try:
+        response = requests.get(base_url, params=params)
+        response.raise_for_status()  # HTTP 오류가 발생하면 예외 발생
+        results = response.json()
+        pmids = [result['pmid'] for result in results.get('documents', [])]
+        return pmids
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except Exception as err:
+        print(f"Other error occurred: {err}")
 
-    # 노드 추가 (type과 pmid 포함)
-    elements = [{
-        "data": {
-            "id": entity_name,
-            "label": entity_name,
-            "type": "Entity",
-            "pmid": pmids  # 관련 논문의 pmid 추가
-        }
-    }]
-
-    return jsonify(elements)
-
-def fetch_pmids_for_entity(entity_name):
-    # PubTator3 API를 사용하여 엔티티와 관련된 논문 PMIDs 가져오기
-    url = f"https://www.ncbi.nlm.nih.gov/research/pubtator3-api/search/?text={entity_name}"
-    response = requests.get(url)
-    if response.status_code != 200:
-        return None
-
-    data = response.json()
-    print(f"Fetched data for entity '{entity_name}': {data}")  # API 결과물 출력
-    pmids = [result['pmid'] for result in data.get('results', [])]
-    return pmids
-
-if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    return []
