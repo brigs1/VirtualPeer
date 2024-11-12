@@ -11,8 +11,7 @@
             margin: 0;
         }
         .section {
-            flex: 1;
-            border: 1px solid #ccc;
+            flex: 0 0 200px; /* 섹션의 폭을 줄임 */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -20,17 +19,17 @@
             min-width: 100px;
         }
         .graph-section {
-            flex: 2;
-            border: 1px solid #000;
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             min-width: 100px;
+            position: relative; /* 부모 요소의 크기에 맞추기 위해 position 설정 */
         }
         #cy {
-            width: 70%;
-            height: 70%;
-            border: 1px solid #ccc;
+            width: 100%;
+            height: 100%;
+            position: absolute; /* 부모 요소의 크기에 맞추기 위해 position 설정 */
         }
         .resizer {
             width: 5px;
@@ -41,7 +40,6 @@
 </head>
 <body>
     <div class="section">
-        <h2>Search Bioconcept</h2>
         <label for="bioconcept">Enter Bioconcept Name:</label>
         <input type="text" id="bioconcept" placeholder="e.g., SNAP-25" />
         <button onclick="loadGraph()">Load Graph</button>
@@ -81,77 +79,187 @@
                             {
                                 selector: 'node[type = "Gene"]',
                                 style: {
-                                    'background-color': '#FF4500', // 오렌지
+                                    'background-color': 'rgba(255, 165, 0, 0.8)', // 오렌지, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
                                     'label': 'data(label)',
-                                    'color': '#000',
-                                    'font-size': '10px',
+                                    'font-size': '6px',
                                     'text-valign': 'center',
-                                    'text-halign': 'center'
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#FF6347',
+                                    'shape': 'ellipse' // 원형
                                 }
                             },
                             {
                                 selector: 'node[type = "Chemical"]',
                                 style: {
-                                    'background-color': '#1E90FF', // 파랑
+                                    'background-color': 'rgba(30, 144, 255, 0.8)', // 파랑, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
                                     'label': 'data(label)',
-                                    'color': '#000',
-                                    'font-size': '10px',
+                                    'font-size': '6px',
                                     'text-valign': 'center',
-                                    'text-halign': 'center'
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#4682B4',
+                                    'shape': 'ellipse' // 원형
                                 }
                             },
                             {
                                 selector: 'node[type = "Disease"]',
                                 style: {
-                                    'background-color': '#32CD32', // 녹색
+                                    'background-color': 'rgba(50, 205, 50, 0.8)', // 녹색, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
                                     'label': 'data(label)',
-                                    'color': '#000',
-                                    'font-size': '10px',
+                                    'font-size': '6px',
                                     'text-valign': 'center',
-                                    'text-halign': 'center'
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#3CB371',
+                                    'shape': 'ellipse' // 원형
                                 }
                             },
                             {
                                 selector: 'node[type = "Mutation"]',
                                 style: {
-                                    'background-color': '#8A2BE2', // 보라색
+                                    'background-color': 'rgba(138, 43, 226, 0.8)', // 보라색, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
                                     'label': 'data(label)',
-                                    'color': '#000',
-                                    'font-size': '10px',
+                                    'font-size': '6px',
                                     'text-valign': 'center',
-                                    'text-halign': 'center'
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#9370DB',
+                                    'shape': 'ellipse' // 원형
                                 }
                             },
                             {
                                 selector: `node[label = "${bioconcept}"]`,
                                 style: {
-                                    'background-color': '#FF0000', // 빨간색
+                                    'background-color': 'rgba(255, 0, 0, 0.8)', // 빨간색, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
                                     'label': 'data(label)',
-                                    'color': '#000',
-                                    'font-size': '10px',
+                                    'font-size': '6px',
                                     'text-valign': 'center',
-                                    'text-halign': 'center'
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#FF6347',
+                                    'shape': 'ellipse' // 원형
                                 }
                             },
                             {
                                 selector: 'edge',
                                 style: {
-                                    'width': 2,
-                                    'line-color': '#cccccc',
+                                    'width': 0.5, // 선 굵기
+                                    'line-color': '#cccccc', // 기본 연한 회색
                                     'target-arrow-color': '#cccccc',
                                     'target-arrow-shape': 'triangle',
                                     'label': 'data(relationship)',
-                                    'font-size': '10px',
-                                    'color': '#0000FF',
+                                    'font-size': '6px',
+                                    'color': '#000000', // 기본 글씨 색상
                                     'text-valign': 'center',
-                                    'text-halign': 'center'
+                                    'text-halign': 'center',
+                                    'text-rotation': 'autorotate'
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "associate"]',
+                                style: {
+                                    'color': '#FF4500', // 오렌지
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "cause"]',
+                                style: {
+                                    'color': '#1E90FF', // 파랑
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "compare"]',
+                                style: {
+                                    'color': '#32CD32', // 녹색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "cotreat"]',
+                                style: {
+                                    'color': '#8A2BE2', // 보라색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "drug_interact"]',
+                                style: {
+                                    'color': '#FFD700', // 금색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "inhibit"]',
+                                style: {
+                                    'color': '#FF69B4', // 핑크색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "interact"]',
+                                style: {
+                                    'color': '#00CED1', // 청록색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "negative_correlate"]',
+                                style: {
+                                    'color': '#FF6347', // 토마토색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "positive_correlate"]',
+                                style: {
+                                    'color': '#7B68EE', // 미디엄 슬레이트 블루
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "prevent"]',
+                                style: {
+                                    'color': '#FF8C00', // 다크 오렌지
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "stimulate"]',
+                                style: {
+                                    'color': '#ADFF2F', // 그린 옐로우
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "treat"]',
+                                style: {
+                                    'color': '#FF1493', // 딥 핑크
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
                                 }
                             }
                         ],
                         layout: {
                             name: 'cose',
                             animate: true,
-                            idealEdgeLength: 100,
+                            idealEdgeLength: 50,
                             nodeOverlap: 10,
                             padding: 10,
                             nodeRepulsion: 4000,
