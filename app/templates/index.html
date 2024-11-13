@@ -36,6 +36,11 @@
             cursor: ew-resize;
             background-color: #ccc;
         }
+        .checkbox-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
     </style>
 </head>
 <body>
@@ -43,6 +48,15 @@
         <label for="bioconcept">Enter Bioconcept Name:</label>
         <input type="text" id="bioconcept" placeholder="e.g., SNAP-25" />
         <button onclick="loadGraph()">Load Graph</button>
+        <div class="checkbox-container">
+            <label><input type="checkbox" class="node-type-checkbox" value="Gene" checked> Gene</label>
+            <label><input type="checkbox" class="node-type-checkbox" value="Chemical" checked> Chemical</label>
+            <label><input type="checkbox" class="node-type-checkbox" value="Mutation" checked> Mutation</label>
+            <label><input type="checkbox" class="node-type-checkbox" value="Disease" checked> Disease</label>
+            <label><input type="checkbox" class="node-type-checkbox" value="Variant" checked> Variant</label>
+            <label><input type="checkbox" class="node-type-checkbox" value="Species" checked> Species</label>
+            <label><input type="checkbox" class="node-type-checkbox" value="Cell Line" checked> Cell Line</label>
+        </div>
     </div>
     <div class="resizer" id="resizer1"></div>
     <div class="graph-section">
@@ -55,6 +69,8 @@
     </div>
 
     <script>
+        let cy;
+
         function loadGraph() {
             const bioconcept = document.getElementById("bioconcept").value;
             if (!bioconcept) {
@@ -72,7 +88,7 @@
 
                     console.log("Received data:", data);
 
-                    const cy = cytoscape({
+                    cy = cytoscape({
                         container: document.getElementById('cy'),
                         elements: data,
                         style: [
@@ -137,6 +153,54 @@
                                     'text-halign': 'center',
                                     'border-width': 0.5, // 외곽선 굵기
                                     'border-color': '#9370DB',
+                                    'shape': 'ellipse' // 원형
+                                }
+                            },
+                            {
+                                selector: 'node[type = "Variant"]',
+                                style: {
+                                    'background-color': 'rgba(255, 20, 147, 0.8)', // 핑크, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
+                                    'label': 'data(label)',
+                                    'font-size': '6px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#FF1493',
+                                    'shape': 'ellipse' // 원형
+                                }
+                            },
+                            {
+                                selector: 'node[type = "Species"]',
+                                style: {
+                                    'background-color': 'rgba(34, 139, 34, 0.8)', // 포레스트 그린, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
+                                    'label': 'data(label)',
+                                    'font-size': '6px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#228B22',
+                                    'shape': 'ellipse' // 원형
+                                }
+                            },
+                            {
+                                selector: 'node[type = "Cell Line"]',
+                                style: {
+                                    'background-color': 'rgba(70, 130, 180, 0.8)', // 스틸 블루, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
+                                    'label': 'data(label)',
+                                    'font-size': '6px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#4682B4',
                                     'shape': 'ellipse' // 원형
                                 }
                             },
@@ -292,6 +356,20 @@
                         const edge = event.target;
                         const edgeInfo = `Edge information:<br>Source: ${edge.data('source')}<br>Target: ${edge.data('target')}<br>Relationship: ${edge.data('relationship')}<br>Publications: ${edge.data('publications').join(', ')}`;
                         document.getElementById('edge-info').innerHTML = edgeInfo;
+                    });
+
+                    // 노드 타입 필터링 기능 추가
+                    document.querySelectorAll('.node-type-checkbox').forEach(checkbox => {
+                        checkbox.addEventListener('change', () => {
+                            const selectedTypes = Array.from(document.querySelectorAll('.node-type-checkbox:checked')).map(cb => cb.value);
+                            cy.nodes().forEach(node => {
+                                if (selectedTypes.includes(node.data('type'))) {
+                                    node.style('display', 'element');
+                                } else {
+                                    node.style('display', 'none');
+                                }
+                            });
+                        });
                     });
                 })
                 .catch(error => {

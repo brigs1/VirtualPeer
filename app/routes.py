@@ -54,12 +54,15 @@ def find_related_entities(entity_id):
 
 @bp.route('/')
 def home():
+    print("Home route accessed")
     return render_template('index.html')
 
 @bp.route('/api/graph/<entity_name>', methods=['GET'])
 def get_graph_data(entity_name):
+    print(f"Graph data requested for entity: {entity_name}")
     entity_id = get_entity_id(entity_name, concept_type="gene")
     if not entity_id:
+        print("Entity ID not found")
         return jsonify({"error": "Entity ID not found"}), 404
 
     related_entities = find_related_entities(entity_id)
@@ -110,6 +113,7 @@ def get_graph_data(entity_name):
         }
         elements.append({"data": edge_data})
 
+    print(f"Returning graph data: {elements}")
     return jsonify(elements)
 
 def fetch_pmids_for_relation(entity_id, source_id, target_id, pmid_count):
