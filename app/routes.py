@@ -116,6 +116,17 @@ def get_graph_data(entity_name):
     print(f"Returning graph data: {elements}")
     return jsonify(elements)
 
+@bp.route('/api/publications', methods=['POST'])
+def get_publication_details():
+    data = request.json
+    pmids = data.get('pmids', [])
+    print(f"Requested PMIDs: {pmids}")
+    if not pmids:
+        return jsonify({"error": "No PMIDs provided"}), 400
+
+    publication_details = fetch_publication_details(pmids)
+    return jsonify(publication_details)
+
 def fetch_pmids_for_relation(entity_id, source_id, target_id, pmid_count):
     # 논문 번호를 가져오는 로직
     search_url = "https://www.ncbi.nlm.nih.gov/research/pubtator3-api/search/"
@@ -136,30 +147,55 @@ def fetch_pmids_for_relation(entity_id, source_id, target_id, pmid_count):
     return []
 
 def fetch_publication_details(pmids):
-    # 논문 상세 정보를 가져오는 로직
+    """
+    PubTator3 API를 통해 논문 상세 정보를 가져오는 함수
+    
+    Args:
+        pmids (list): PMID 목록
+        
+    Returns:
+        list: 논문 정보 목록
+    """
     base_url = "https://www.ncbi.nlm.nih.gov/research/pubtator3-api/publications/export/biocjson"
     params = {"pmids": ",".join(map(str, pmids))}
 
     try:
         response = requests.get(base_url, params=params)
-        response.raise_for_status()  # HTTP 오류가 발생하면 예외 발생
+        response.raise_for_status()
         results = response.json()
+        print("Fetched raw data:", results)
+        
         publications = []
-        for document in results.get('documents', []):
+        for document in results.get('PubTator3', []):
+            # 기본 정보 추출
             publication = {
                 "pmid": document.get('pmid'),
-                "pmcid": document.get('pmcid'),
-                "title": document.get('title'),
                 "journal": document.get('journal'),
                 "authors": document.get('authors'),
                 "date": document.get('date'),
-                "doi": document.get('doi')
+                "title": "",
+                "abstract": ""
             }
+            
+            # passages에서 title과 abstract 찾기
+            for passage in document.get('passages', []):
+                passage_type = passage.get('infons', {}).get('type', '')
+                if passage_type == 'title':
+                    publication['title'] = passage.get('text', '')
+                elif passage_type == 'abstract':
+                    publication['abstract'] = passage.get('text', '')
+            
             publications.append(publication)
+            
+        print("Processed publications:", publications)
         return publications
+        
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")
+        if 'response' in locals():
+            print(f"Response content: {response.text}")
     except Exception as err:
         print(f"Other error occurred: {err}")
+        print(f"Error type: {type(err)}")
 
     return []
