@@ -50,55 +50,21 @@
             border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        #edge-info .info {
+            font-size: 10px; /* 글씨 크기 줄이기 */
+        }
+        #edge-info .publication {
+            font-size: 10px; /* Title, Abstract 내용의 폰트 크기 */
+        }
         input[type="text"] {
             padding: 8px;
             margin: 10px 0;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 180px;
-        }
-        button {
-            padding: 8px 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 10px 0;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        .loading {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        .error-message {
-            color: #ff0000;
-            padding: 10px;
-            background-color: #ffe6e6;
-            border-radius: 4px;
-            margin: 10px 0;
-        }
-        .publication-card {
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            margin: 10px 0;
         }
     </style>
 </head>
 <body>
     <div class="section">
-        <h2>Controls</h2>
         <label for="bioconcept">Enter Bioconcept Name:</label>
         <input type="text" id="bioconcept" placeholder="e.g., SNAP-25" />
         <button onclick="loadGraph()">Load Graph</button>
@@ -115,283 +81,380 @@
     <div class="resizer" id="resizer1"></div>
     <div class="graph-section">
         <div id="cy"></div>
-        <div class="loading" id="loading">Loading...</div>
     </div>
     <div class="resizer" id="resizer2"></div>
     <div class="section">
         <h2>Edge Information</h2>
-        <div id="edge-info"></div>
+        <div id="edge-info" style="margin-top: 20px;"></div>
     </div>
-<script>
-let cy;
 
-// HTML 이스케이프 함수
-function escapeHtml(unsafe) {
-    return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+    <script>
+        let cy;
 
-// 로딩 표시 함수
-function showLoading() {
-    document.getElementById('loading').style.display = 'block';
-}
-
-function hideLoading() {
-    document.getElementById('loading').style.display = 'none';
-}
-
-function loadGraph() {
-    const bioconcept = document.getElementById("bioconcept").value;
-    if (!bioconcept) {
-        alert("Please enter a bioconcept name.");
-        return;
-    }
-
-    showLoading();
-    const selectedTypes = Array.from(document.querySelectorAll('.node-type-checkbox:checked')).map(cb => cb.value);
-
-    fetch(`http://127.0.0.1:5001/api/graph/${bioconcept}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.error) {
-                throw new Error(data.error);
+        function loadGraph() {
+            const bioconcept = document.getElementById("bioconcept").value;
+            if (!bioconcept) {
+                alert("Please enter a bioconcept name.");
+                return;
             }
 
-            console.log("Received data:", data);
-
-            const filteredElements = data.filter(element => {
-                if (element.data.type) {
-                    return selectedTypes.includes(element.data.type);
-                }
-                return true;
-            });
-
-            initializeCytoscape(filteredElements, bioconcept);
-        })
-        .catch(error => {
-            console.error("Error fetching graph data:", error);
-            alert(`Error loading graph data: ${error.message}`);
-        })
-        .finally(() => {
-            hideLoading();
-        });
-}
-
-function initializeCytoscape(elements, bioconcept) {
-    const nodeStyles = {
-        'Gene': {
-            'background-color': 'rgba(255, 165, 0, 0.8)',
-            'border-color': '#FF6347'
-        },
-        'Chemical': {
-            'background-color': 'rgba(30, 144, 255, 0.8)',
-            'border-color': '#4682B4'
-        },
-        'Disease': {
-            'background-color': 'rgba(50, 205, 50, 0.8)',
-            'border-color': '#3CB371'
-        },
-        'Mutation': {
-            'background-color': 'rgba(138, 43, 226, 0.8)',
-            'border-color': '#9370DB'
-        },
-        'Variant': {
-            'background-color': 'rgba(255, 20, 147, 0.8)',
-            'border-color': '#FF1493'
-        },
-        'Species': {
-            'background-color': 'rgba(34, 139, 34, 0.8)',
-            'border-color': '#228B22'
-        },
-        'Cell Line': {
-            'background-color': 'rgba(70, 130, 180, 0.8)',
-            'border-color': '#4682B4'
-        }
-    };
-
-    const styles = Object.entries(nodeStyles).map(([type, style]) => ({
-        selector: `node[type = "${type}"]`,
-        style: {
-            ...style,
-            'color': '#000000',
-            'width': '30px',
-            'height': '30px',
-            'label': 'data(label)',
-            'font-size': '6px',
-            'text-valign': 'center',
-            'text-halign': 'center',
-            'border-width': 0.5,
-            'shape': 'ellipse'
-        }
-    }));
-
-    cy = cytoscape({
-        container: document.getElementById('cy'),
-        elements: elements,
-        style: [
-            ...styles,
-            {
-                selector: `node[label = "${bioconcept}"]`,
-                style: {
-                    'background-color': 'rgba(255, 0, 0, 0.8)',
-                    'color': '#000000',
-                    'width': '30px',
-                    'height': '30px',
-                    'label': 'data(label)',
-                    'font-size': '6px',
-                    'text-valign': 'center',
-                    'text-halign': 'center',
-                    'border-width': 0.5,
-                    'border-color': '#FF6347',
-                    'shape': 'ellipse'
-                }
-            },
-            {
-                selector: 'edge',
-                style: {
-                    'width': 0.5,
-                    'line-color': '#cccccc',
-                    'target-arrow-color': '#cccccc',
-                    'target-arrow-shape': 'triangle',
-                    'label': 'data(relationship)',
-                    'font-size': '6px',
-                    'color': '#000000',
-                    'text-valign': 'center',
-                    'text-halign': 'center',
-                    'text-rotation': 'autorotate'
-                }
-            }
-        ],
-        layout: {
-            name: 'cose',
-            animate: true,
-            idealEdgeLength: 50,
-            nodeOverlap: 10,
-            padding: 10,
-            nodeRepulsion: 4000,
-            edgeElasticity: 100
-        }
-    });
-
-    // 노드 더블클릭 이벤트
-    cy.on('dbltap', 'node', (event) => {
-        const node = event.target;
-        alert(`Node information:\nLabel: ${node.data('label')}\nType: ${node.data('type')}`);
-    });
-
-    // 엣지 더블클릭 이벤트
-    cy.on('dbltap', 'edge', (event) => {
-        const edge = event.target;
-        console.log("Requested PMIDs:", edge.data('publications'));
-        
-        const edgeInfoContainer = document.getElementById('edge-info');
-        edgeInfoContainer.innerHTML = '<div class="loading">Loading publication details...</div>';
-        
-        fetch(`http://127.0.0.1:5001/api/publications`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ pmids: edge.data('publications') })
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(publications => {
-            console.log("Fetched publications:", publications);
-            
-            if (publications && publications.length > 0) {
-                let htmlContent = `
-                    <div class="publication-card">
-                        <h3>Edge Information</h3>
-                        <p><strong>Source:</strong> ${escapeHtml(edge.data('source'))}</p>
-                        <p><strong>Target:</strong> ${escapeHtml(edge.data('target'))}</p>
-                        <p><strong>Relationship:</strong> ${escapeHtml(edge.data('relationship'))}</p>
-                        <h4>Publications:</h4>
-                    </div>
-                `;
-
-                publications.forEach(pub => {
-                    htmlContent += `
-                        <div class="publication-card">
-                            <p><strong>Title:</strong> ${escapeHtml(pub.title)}</p>
-                            <p><strong>Abstract:</strong> ${escapeHtml(pub.abstract)}</p>
-                        </div>
-                    `;
-                });
-
-                edgeInfoContainer.innerHTML = htmlContent;
-            } else {
-                edgeInfoContainer.innerHTML = '<div class="error-message">No publication details available.</div>';
-            }
-        })
-        .catch(error => {
-            console.error("Error fetching publication details:", error);
-            edgeInfoContainer.innerHTML = '<div class="error-message">Error loading publication details.</div>';
-        });
-    });
-
-    // 노드 타입 필터링 기능 추가
-    document.querySelectorAll('.node-type-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
             const selectedTypes = Array.from(document.querySelectorAll('.node-type-checkbox:checked')).map(cb => cb.value);
-            cy.nodes().forEach(node => {
-                if (selectedTypes.includes(node.data('type'))) {
-                    node.style('display', 'element');
-                } else {
-                    node.style('display', 'none');
-                }
+
+            fetch(`http://127.0.0.1:5001/api/graph/${bioconcept}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    console.log("Received data:", data);
+
+                    const filteredElements = data.filter(element => {
+                        if (element.data.type) {
+                            return selectedTypes.includes(element.data.type);
+                        }
+                        return true; // edges
+                    });
+
+                    cy = cytoscape({
+                        container: document.getElementById('cy'),
+                        elements: filteredElements,
+                        style: [
+                            {
+                                selector: 'node[type = "Gene"]',
+                                style: {
+                                    'background-color': 'rgba(255, 165, 0, 0.8)', // 오렌지, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
+                                    'label': 'data(label)',
+                                    'font-size': '6px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#FF6347',
+                                    'shape': 'ellipse' // 원형
+                                }
+                            },
+                            {
+                                selector: 'node[type = "Chemical"]',
+                                style: {
+                                    'background-color': 'rgba(30, 144, 255, 0.8)', // 파랑, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
+                                    'label': 'data(label)',
+                                    'font-size': '6px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#4682B4',
+                                    'shape': 'ellipse' // 원형
+                                }
+                            },
+                            {
+                                selector: 'node[type = "Disease"]',
+                                style: {
+                                    'background-color': 'rgba(50, 205, 50, 0.8)', // 녹색, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
+                                    'label': 'data(label)',
+                                    'font-size': '6px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#3CB371',
+                                    'shape': 'ellipse' // 원형
+                                }
+                            },
+                            {
+                                selector: 'node[type = "Mutation"]',
+                                style: {
+                                    'background-color': 'rgba(138, 43, 226, 0.8)', // 보라색, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
+                                    'label': 'data(label)',
+                                    'font-size': '6px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#9370DB',
+                                    'shape': 'ellipse' // 원형
+                                }
+                            },
+                            {
+                                selector: 'node[type = "Variant"]',
+                                style: {
+                                    'background-color': 'rgba(255, 20, 147, 0.8)', // 핑크, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
+                                    'label': 'data(label)',
+                                    'font-size': '6px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#FF1493',
+                                    'shape': 'ellipse' // 원형
+                                }
+                            },
+                            {
+                                selector: 'node[type = "Species"]',
+                                style: {
+                                    'background-color': 'rgba(34, 139, 34, 0.8)', // 포레스트 그린, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
+                                    'label': 'data(label)',
+                                    'font-size': '6px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#228B22',
+                                    'shape': 'ellipse' // 원형
+                                }
+                            },
+                            {
+                                selector: 'node[type = "Cell Line"]',
+                                style: {
+                                    'background-color': 'rgba(70, 130, 180, 0.8)', // 스틸 블루, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
+                                    'label': 'data(label)',
+                                    'font-size': '6px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#4682B4',
+                                    'shape': 'ellipse' // 원형
+                                }
+                            },
+                            {
+                                selector: `node[label = "${bioconcept}"]`,
+                                style: {
+                                    'background-color': 'rgba(255, 0, 0, 0.8)', // 빨간색, 반투명
+                                    'color': '#000000', // 글씨 색상
+                                    'width': '30px',
+                                    'height': '30px',
+                                    'label': 'data(label)',
+                                    'font-size': '6px',
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'border-width': 0.5, // 외곽선 굵기
+                                    'border-color': '#FF6347',
+                                    'shape': 'ellipse' // 원형
+                                }
+                            },
+                            {
+                                selector: 'edge',
+                                style: {
+                                    'width': 0.5, // 선 굵기
+                                    'line-color': '#cccccc', // 기본 연한 회색
+                                    'target-arrow-color': '#cccccc',
+                                    'target-arrow-shape': 'triangle',
+                                    'label': 'data(relationship)',
+                                    'font-size': '6px',
+                                    'color': '#000000', // 기본 글씨 색상
+                                    'text-valign': 'center',
+                                    'text-halign': 'center',
+                                    'text-rotation': 'autorotate'
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "associate"]',
+                                style: {
+                                    'color': '#FF4500', // 오렌지
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "cause"]',
+                                style: {
+                                    'color': '#1E90FF', // 파랑
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "compare"]',
+                                style: {
+                                    'color': '#32CD32', // 녹색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "cotreat"]',
+                                style: {
+                                    'color': '#8A2BE2', // 보라색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "drug_interact"]',
+                                style: {
+                                    'color': '#FFD700', // 금색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "inhibit"]',
+                                style: {
+                                    'color': '#FF69B4', // 핑크색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "interact"]',
+                                style: {
+                                    'color': '#00CED1', // 청록색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "negative_correlate"]',
+                                style: {
+                                    'color': '#FF6347', // 토마토색
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "positive_correlate"]',
+                                style: {
+                                    'color': '#7B68EE', // 미디엄 슬레이트 블루
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "prevent"]',
+                                style: {
+                                    'color': '#FF8C00', // 다크 오렌지
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "stimulate"]',
+                                style: {
+                                    'color': '#ADFF2F', // 그린 옐로우
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            },
+                            {
+                                selector: 'edge[relationship = "treat"]',
+                                style: {
+                                    'color': '#FF1493', // 딥 핑크
+                                    'text-margin-y': '0px' // 텍스트가 겹치지 않도록 조정
+                                }
+                            }
+                        ],
+                        layout: {
+                            name: 'cose',
+                            animate: true,
+                            idealEdgeLength: 50,
+                            nodeOverlap: 10,
+                            padding: 10,
+                            nodeRepulsion: 4000,
+                            edgeElasticity: 100
+                        }
+                    });
+
+                    // 노드 데이터 확인
+                    cy.nodes().forEach(node => {
+                        console.log(node.data());
+                        if (node.data().type === "Chemical") {
+                            console.log("Chemical node found:", node.data());
+                        }
+                    });
+
+                    cy.on('dbltap', 'node', (event) => {
+                        const node = event.target;
+                        alert(`Node information:\nLabel: ${node.data('label')}\nType: ${node.data('type')}`);
+                    });
+
+                    // 엣지 데이터 확인
+                    cy.edges().forEach(edge => console.log(edge.data()));
+                    cy.on('dbltap', 'edge', (event) => {
+                        const edge = event.target;
+                        console.log("Requested PMIDs:", edge.data('publications')); // PMIDs 출력
+                        fetch(`http://127.0.0.1:5001/api/publications`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ pmids: edge.data('publications') })
+                        })
+                        .then(response => response.json())
+                        .then(publications => {
+                            console.log("Fetched publications:", publications); // 결과값 출력
+                            if (publications.length > 0) {
+                                let publicationsInfo = publications.map(pub => `
+                                    <div class="publication">
+                                        <a href="${pub.pdf_link}" target="_blank">${pub.title}</a>
+                                    </div>
+                                `).join('');
+                                const edgeInfo = `
+                                    <div class="info">Edge information:</div>
+                                    <div class="info">Source: ${edge.data('source')}</div>
+                                    <div class="info">Target: ${edge.data('target')}</div>
+                                    <div class="info">Relationship: ${edge.data('relationship')}</div>
+                                    <div class="info">Publications:</div>
+                                    ${publicationsInfo}
+                                `;
+                                document.getElementById('edge-info').innerHTML = edgeInfo;
+                                console.log("Edge info updated in HTML:", edgeInfo); // 디버깅 출력
+                            } else {
+                                document.getElementById('edge-info').innerHTML = "No publication details available.";
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error fetching publication details:", error);
+                            alert("Error loading publication details.");
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching graph data:", error);
+                    alert("Error loading graph data.");
+                });
+        }
+
+        // Resizer 기능 추가
+        const resizers = document.querySelectorAll('.resizer');
+        let currentResizer;
+        let startX;
+        let startWidthPrev;
+        let startWidthNext;
+
+        for (let resizer of resizers) {
+            resizer.addEventListener('mousedown', function(e) {
+                currentResizer = e.target;
+                startX = e.clientX;
+                const prevSibling = currentResizer.previousElementSibling;
+                const nextSibling = currentResizer.nextElementSibling;
+                startWidthPrev = prevSibling.getBoundingClientRect().width;
+                startWidthNext = nextSibling.getBoundingClientRect().width;
+                document.addEventListener('mousemove', resize);
+                document.addEventListener('mouseup', stopResize);
             });
-        });
-    });
+        }
 
-}
+        function resize(e) {
+            const prevSibling = currentResizer.previousElementSibling;
+            const nextSibling = currentResizer.nextElementSibling;
 
-// Resizer 기능
-const resizers = document.querySelectorAll('.resizer');
-let currentResizer;
-let startX;
-let startWidthPrev;
-let startWidthNext;
+            const newPrevWidth = startWidthPrev + (e.clientX - startX);
+            const newNextWidth = startWidthNext - (e.clientX - startX);
 
-for (let resizer of resizers) {
-    resizer.addEventListener('mousedown', function(e) {
-        currentResizer = e.target;
-        startX = e.clientX;
-        const prevSibling = currentResizer.previousElementSibling;
-        const nextSibling = currentResizer.nextElementSibling;
-        startWidthPrev = prevSibling.getBoundingClientRect().width;
-        startWidthNext = nextSibling.getBoundingClientRect().width;
-        document.addEventListener('mousemove', resize);
-        document.addEventListener('mouseup', stopResize);
-    });
-}
+            prevSibling.style.flex = `0 0 ${newPrevWidth}px`;
+            nextSibling.style.flex = `0 0 ${newNextWidth}px`;
+        }
 
-function resize(e) {
-    const prevSibling = currentResizer.previousElementSibling;
-    const nextSibling = currentResizer.nextElementSibling;
-    const newPrevWidth = startWidthPrev + (e.clientX - startX);
-    const newNextWidth = startWidthNext - (e.clientX - startX);
-    prevSibling.style.flex = `0 0 ${newPrevWidth}px`;
-    nextSibling.style.flex = `0 0 ${newNextWidth}px`;
-}
-
-function stopResize() {
-    document.removeEventListener('mousemove', resize);
-    document.removeEventListener('mouseup', stopResize);
-}
-</script>
+        function stopResize() {
+            document.removeEventListener('mousemove', resize);
+            document.removeEventListener('mouseup', stopResize);
+        }
+    </script>
 </body>
 </html>

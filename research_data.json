@@ -1,0 +1,131 @@
+{
+    "schema": {
+        "classes": [
+            {
+                "class": "Research",
+                "vectorizer": "none",
+                "vectorIndexType": "hnsw",
+                "properties": [
+                    {
+                        "name": "title",
+                        "dataType": [
+                            "text"
+                        ]
+                    },
+                    {
+                        "name": "abstract",
+                        "dataType": [
+                            "text"
+                        ]
+                    },
+                    {
+                        "name": "authors",
+                        "dataType": [
+                            "text[]"
+                        ]
+                    },
+                    {
+                        "name": "keywords",
+                        "dataType": [
+                            "text[]"
+                        ]
+                    },
+                    {
+                        "name": "year",
+                        "dataType": [
+                            "int"
+                        ]
+                    },
+                    {
+                        "name": "journal",
+                        "dataType": [
+                            "text"
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "data": [
+        {
+            "title": "References",
+            "abstract": "",
+            "authors": [],
+            "keywords": [],
+            "year": 0,
+            "journal": ""
+        },
+        {
+            "title": "References",
+            "abstract": "An understanding of connections between gut microbiome and liver has provided important insights into the pathophysiology of liver diseases. Since gut microbial dysbiosis increases gut permeability, the metabolites biosynthesized by them can reach the liver through portal circulation and affect hepatic immunity and inflammation. The immune cells activated by these metabolites can also reach liver through lymphatic circulation. Liver influences immunity and metabolism in multiple organs in the body, including gut. It releases bile acids and other metabolites into biliary tract from where they enter the systemic circulation. In this review, the bidirectional communication between the gut and the liver and the molecular cross talk between the host and the microbiome has been discussed. This review also provides details into the intricate level of communication and the role of microbiome in Gut-Liver-Brain, Gut-Liver-Kidney, Gut-Liver-Lung, and Gut-Liver-Heart axes. These observations indicate a complex network of interactions between host organs influenced by gut microbiome.",
+            "authors": [],
+            "keywords": [],
+            "year": 0,
+            "journal": ""
+        },
+        {
+            "title": "References",
+            "abstract": "While heart disease, dementia and liver disease often co-occur, multi-organ imaging is needed for deeper elucidation of these cross-organ links. Here, the authors use image-derived phenotypes to describe underlying associations between heart, brain and liver health in a large population cohort.",
+            "authors": [],
+            "keywords": [],
+            "year": 0,
+            "journal": ""
+        },
+        {
+            "title": "References",
+            "abstract": "The intestine is considered to be a vital digestive organ to absorb nutrients and is the largest immune organ, while numerous microorganisms coexist with the host. It is well known that the complex interactions between the gut microbiota and the host's immune system inevitably affect the function of other organs, creating an \"axis\" between them. During the past few years, a new technique based mainly on microfluidics and cell biology has been developed to emulate the structure, function, and microenvironment of the human gut, called the \"gut-on-chip\". This microfluidic chip provides insight into key aspects of gut function in health and disease, such as the gut-brain axis, gut-liver axis, gut-kidney axis, and gut-lung axis. In this review, we first describe the basic theory of the gut axis and the various composition and parameter monitoring of the gut microarray systems, as well as summarize the development and emerging advances in the gut-organ-on-chip, with a focus on the host-gut flora and nutrient metabolism, and highlight their role in pathophysiological studies. In addition, this paper discusses the challenges and prospects for the current development and further use of the gut-organ-on-chip platform.",
+            "authors": [],
+            "keywords": [],
+            "year": 0,
+            "journal": ""
+        },
+        {
+            "title": "Gut-organ axis: a microbial outreach and networking.",
+            "abstract": "Human gut microbiota (GM) includes a complex and dynamic population of microorganisms that are crucial for well-being and survival of the organism. It has been reported as diverse and relatively stable with shared core microbiota, including Bacteroidetes and Firmicutes as the major dominants. They are the key regulators of body homeostasis, involving both intestinal and extra-intestinal effects by influencing many physiological functions such as metabolism, maintenance of barrier homeostasis, inflammation and hematopoiesis. Any alteration in GM community structures not only trigger gut disorders but also influence other organs and cause associated diseases. In recent past, the GM has been defined as a 'vital organ' with its involvement with other organs; thus, establishing a link or a bi- or multidirectional communication axis between the organs via neural, endocrine, immune, humoral and metabolic pathways. Alterations in GM have been linked to several diseases known to humans; although the exact interaction mechanism between the gut and the organs is yet to be defined. In this review, the bidirectional relationship between the gut and the vital human organs was envisaged and discussed under several headings. Furthermore, several disease symptoms were also revisited to redefine the communication network between the gut microbes and the associated organs.",
+            "authors": [],
+            "keywords": [],
+            "year": 0,
+            "journal": ""
+        },
+        {
+            "title": "The muscle to bone axis (and viceversa): An encrypted language affecting tissues and organs and yet to be codified?",
+            "abstract": "Skeletal muscles and bone tissue form the musculoskeletal apparatus, a complex system essential for the voluntary movement. The loss of muscle mass and muscle strength is often associated with a loss of bone mass, in a \"hazardous duet\" which implies the co-existence of sarcopenia-osteoporosis and exposes patients to a deterioration in quality of life and increased mortality. From the mechanostat theory to the recent definition of the osteosarcopenia syndrome, many aspects of muscle-bone interaction have been investigated in recent decades. The mechanical interaction is now accepted, considering the close anatomical relationship between the two tissues, however, much remains to be discovered regarding the biochemical muscle-bone interaction. Skeletal muscle has been defined as an endocrine organ capable of exerting an action on other tissues. Myokines, bioactive polypeptides released by the muscle, could represent the encrypted message in the communication between muscle and bone. These two tissues have a reciprocal influence on their metabolisms and respond in a similar way to the multiple external factors. The aim of this review is to stimulate the understanding of the encrypted language between muscle and bone, highlighting the role of catabolic pathways and oxidative stress in the musculoskeletal apparatus to elucidate the shared mechanisms and the similarity of response to the same stimuli by different tissues. Our understanding of muscle-bone interactions it could be useful to identify and develop new strategies to treat musculoskeletal diseases, together with pharmacological, nutritional and exercise-based approaches, which are already in use for the treatment of these pathologies.",
+            "authors": [],
+            "keywords": [],
+            "year": 0,
+            "journal": ""
+        },
+        {
+            "title": "Recent Advances in Gut- and Gut-Organ-Axis-on-a-Chip Models.",
+            "abstract": "The human gut extracts nutrients from the diet while forming the largest barrier against the outer environment. In addition, the gut actively maintains homeostasis through intricate interactions with the gut microbes, the immune system, the enteric nervous system, and other organs. These interactions influence digestive health and, furthermore, play crucial roles in systemic health and disease. Given its primary role in absorbing and metabolizing orally administered drugs, there is significant interest in the development of preclinical in vitro model systems that can accurately emulate the intestine in vivo. A gut-on-a-chip system holds great potential as a testing and screening platform because of its ability to emulate the physiological aspects of in vivo tissues and expandability to incorporate and combine with other organs. This review aims to identify the key physiological features of the human gut that need to be incorporated to build more accurate preclinical models and highlights the recent progress in gut-on-a-chip systems and competing technologies toward building more physiologically relevant preclinical model systems. Furthermore, various efforts to construct multi-organ systems with the gut, called gut-organ-axis-on-a-chip models, are discussed. In vitro gut models with physiological relevance can provide valuable platforms for bridging the gap between preclinical and clinical studies.",
+            "authors": [],
+            "keywords": [],
+            "year": 0,
+            "journal": ""
+        },
+        {
+            "title": "An Organ-on-chip Platform for Simulating Drug Metabolism along the Gut-liver Axis.",
+            "abstract": "The human microbiome significantly influences drug metabolism through the gut-liver axis, leading to modified drug responses and potential toxicity. Due to the complex nature of the human gut environment, our understanding of microbiome-driven impacts on these processes is limited. To address this, we introduce a multiorgan-on-a-chip (MOoC) platform that combines the human microbial-crosstalk (HuMiX) gut-on-chip (GoC) and the Dynamic42 liver-on-chip (LoC), mimicking the bidirectional interconnection between the gut and liver known as the gut-liver axis. This platform supports the viability and functionality of intestinal and liver cells. In a proof-of-concept study, we replicated the metabolism of irinotecan, a widely used colorectal cancer drug, within our MOoC. Utilizing liquid chromatography coupled to tandem mass spectrometry (LC-MS/MS), we tracked irinotecan metabolites, confirming the platform's ability to represent drug metabolism along the gut-liver axis. Furthermore, using our gut-liver platform, we show that the colorectal cancer-associated gut bacterium, Escherichia coli, modifies irinotecan metabolism through the transformation of its inactive metabolite SN-38G into its toxic metabolite SN-38. This platform serves as a robust tool for investigating the intricate interplay between gut microbes and pharmaceuticals, offering a representative alternative to animal models and providing novel drug development strategies. This article is protected by copyright. All rights reserved.",
+            "authors": [],
+            "keywords": [],
+            "year": 0,
+            "journal": ""
+        },
+        {
+            "title": "A multifaceted kinase axis regulates plant organ abscission through conserved signaling mechanisms.",
+            "abstract": "Plants have evolved mechanisms to abscise organs as they develop or when exposed to unfavorable conditions.1 Uncontrolled abscission of petals, fruits, or leaves can impair agricultural productivity.2,3,4,5 Despite its importance for abscission progression, our understanding of the IDA signaling pathway and its regulation remains incomplete. IDA is secreted to the apoplast, where it is perceived by the receptors HAESA (HAE) and HAESA-LIKE2 (HSL2) and somatic embryogenesis receptor kinase (SERK) co-receptors.6,7,8,9 These plasma membrane receptors activate an intracellular cascade of mitogen-activated protein kinases (MAPKs) by an unknown mechanism.10,11,12 Here, we characterize brassinosteroid signaling kinases (BSKs) as regulators of floral organ abscission in Arabidopsis. BSK1 localizes to the plasma membrane of abscission zone cells, where it interacts with HAESA receptors to regulate abscission. Furthermore, we demonstrate that YODA (YDA) has a leading role among other MAPKKKs in controlling abscission downstream of the HAESA/BSK complex. This kinase axis, comprising a leucine-rich repeat receptor kinase, a BSK, and an MAPKKK, is known to regulate stomatal patterning, early embryo development, and immunity.10,13,14,15,16 How specific cellular responses are obtained despite signaling through common effectors is not well understood. We show that the identified abscission-promoting allele of BSK1 also enhances receptor signaling in other BSK-mediated pathways, suggesting conservation of signaling mechanisms. Furthermore, we provide genetic evidence supporting independence of BSK1 function from its kinase activity in several developmental processes. Together, our findings suggest that BSK1 facilitates signaling between plasma membrane receptor kinases and MAPKKKs via conserved mechanisms across multiple facets of plant development.",
+            "authors": [],
+            "keywords": [],
+            "year": 0,
+            "journal": ""
+        },
+        {
+            "title": "Impact of Lactobacillaceae supplementation on the multi-organ axis during MASLD.",
+            "abstract": "The gut-liver axis plays a pivotal role in maintaining body homeostasis. Disruption of the gut-liver axis is linked to a multitude of diseases, including metabolic dysfunction-associated steatotic liver disease (MASLD). Probiotic strains from the Lactobacillaceae family are commonly used to mitigate experimental MASLD. Over the years, numerous studies have demonstrated the efficacy of these probiotics, often focusing on the outcome of liver disease. This review aims to further understand MASLD as a systemic metabolic dysfunction and to highlight the effects of probiotics on multi-organ axis, including organs such as the gastrointestinal tract, pancreas, muscle, adipose tissue, and the immune system. We specifically discuss evidence on how supplementation with Lactobacillaceae strains may alleviate MASLD by not only restoring liver health but also by modulating the physiology of other organ systems.",
+            "authors": [],
+            "keywords": [],
+            "year": 0,
+            "journal": ""
+        }
+    ]
+}

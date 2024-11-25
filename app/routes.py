@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, jsonify, request
 import requests
 import time
+from serpapi import GoogleSearch
 
 bp = Blueprint('api', __name__)
 
@@ -42,9 +43,27 @@ def find_related_entities(entity_id):
                 pmid_count = entity['publications']
                 pmids = fetch_pmids_for_relation(entity_id, entity['source'], entity['target'], pmid_count)
                 entity['publications'] = pmids
-                time.sleep(0.5)  # 각 요청 후 0.5초 대기
+                time.sleep(0.1)  # 각 요청 후 0.5초 대기
 
         return related_entities
+    except requests.exceptions.HTTPError as http_err:
+        print(f"HTTP error occurred: {http_err}")
+    except Exception as err:
+        print(f"Other error occurred: {err}")
+
+    return []
+
+def get_synonyms(term):
+    base_url = "https://www.ncbi.nlm.nih.gov/research/pubtator3-api/annotations/synonyms"
+    params = {"concept": term}
+
+    try:
+        response = requests.get(base_url, params=params)
+        response.raise_for_status()
+        results = response.json()
+        synonyms = [result['synonym'] for result in results.get('annotations', [])]
+        print(f"Synonyms for {term}: {synonyms}")
+        return synonyms
     except requests.exceptions.HTTPError as http_err:
         print(f"HTTP error occurred: {http_err}")
     except Exception as err:
@@ -126,6 +145,62 @@ def get_publication_details():
 
     publication_details = fetch_publication_details(pmids)
     return jsonify(publication_details)
+
+@bp.route('/search', methods=['GET'])
+def search():
+    search_term = request.args.get('search_term')
+    synonyms = get_synonyms(search_term)
+    search_terms = [search_term] + synonyms
+
+    params = {
+        "engine": "google_scholar",
+        "q": " OR ".join(search_terms),
+        "api_key": "a93cea1cff7c2d17fa6af11d740dc06f4d9fb400471185a9527a5469453f86b1",
+        "num": 20
+    }
+
+    all_results = []
+    page = 1
+
+    while True:
+        params["start"] = (page - 1) * params["num"]
+        search = GoogleSearch(params)
+        results = search.get_dict()
+
+        if "organic_results" in results:
+            all_results.extend(results["organic_results"])
+            page += 1
+        else:
+            break
+
+        if page > 5:
+            break
+
+    formatted_results = []
+    for index, result in enumerate(all_results):
+        title = result.get('title', '').replace(search_term, f'<span class="highlight">{search_term}</span>')
+        snippet = result.get('snippet', '').replace(search_term, f'<span class="highlight">{search_term}</span>')
+        link = result.get('link', '#')
+        authors = ', '.join([author['name'] for author in result.get('publication_info', {}).get('authors', [])])
+        year = result.get('publication_info', {}).get('year', '')
+        journal = result.get('publication_info', {}).get('journal', '')
+        citations = result.get('inline_links', {}).get('cited_by', {}).get('total', 0)
+        pdf_link = result.get('resources', [{}])[0].get('link', '')
+        related_link = result.get('inline_links', {}).get('related_pages_link', '')
+
+        formatted_results.append({
+            "title": title,
+            "snippet": snippet,
+            "link": link,
+            "authors": authors,
+            "year": year,
+            "journal": journal,
+            "citations": citations,
+            "pdf_link": pdf_link,
+            "related_link": related_link
+        })
+
+    return render_template('index.html', results=formatted_results)
 
 def fetch_pmids_for_relation(entity_id, source_id, target_id, pmid_count):
     # 논문 번호를 가져오는 로직
